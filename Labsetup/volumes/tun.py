@@ -24,5 +24,12 @@ os.system("ip addr add 192.168.53.99/24 dev {}".format(ifname))
 os.system("ip link set dev {} up".format(ifname))
 
 while True:
-   time.sleep(10)
-
+   # Get a packet from the tun interface
+   packet = os.read(tun, 2048)
+   if packet:
+      ip = IP(packet)
+      print(ip.summary())
+      newip  = IP(src=ip.dst, dst=ip.src)
+      newpkt = newip/ip.payload
+      print(newip.summary())
+      os.write(tun, bytes(newpkt))
